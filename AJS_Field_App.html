@@ -256,6 +256,7 @@ function openVisit(id, name) {
   state.currentVisit = {
     id:      id, name:    name,
     jobNo:   getJobNo(), project: getProject(),
+    client:  getClient(),
     date:    parsed ? parsed.date : '',
   };
   state.stack.push({id:id, name:name});
@@ -281,7 +282,7 @@ function openVisit(id, name) {
 
 function buildROW() {
   var v = state.currentVisit;
-  return ROW_URL + '?jobno=' + enc(v.jobNo) + '&project=' + enc(v.project) + '&date=' + enc(v.date) + '&surveyor=Ashley%20Smith&folderId=' + enc(v.id) ;
+  return ROW_URL + '?jobno=' + enc(v.jobNo) + '&project=' + enc(v.project) + '&client=' + enc(v.client) + '&date=' + enc(v.date) + '&surveyor=Ashley%20Smith&folderId=' + enc(v.id);
 }
 
 function goBack() {
@@ -308,6 +309,10 @@ function getJobNo() {
 }
 function getProject() {
   for (var i=0;i<state.stack.length;i++) { var m=state.stack[i].name.match(/^\d{2}-\d{4}\s+(.+?)(?:\s*\([^)]+\))?$/); if(m)return m[1].trim(); }
+  return '';
+}
+function getClient() {
+  for (var i=0;i<state.stack.length;i++) { var m=state.stack[i].name.match(/\(([^)]+)\)\s*$/); if(m)return m[1].trim(); }
   return '';
 }
 
