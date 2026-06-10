@@ -211,7 +211,7 @@ function loadFolder(folderId, folderName) {
   showLoading();
 
   var q = "'" + folderId + "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false";
-  fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&orderBy=name&fields=files(id,name)&pageSize=200', {
+  fetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&orderBy=name&fields=files(id,name)&pageSize=200&supportsAllDrives=true&includeItemsFromAllDrives=true', {
     headers: {Authorization:'Bearer ' + state.token}
   })
   .then(function(r){return r.json();})
@@ -346,7 +346,7 @@ function uploadPhoto(blob) {
     var form=new FormData();
     form.append('metadata',new Blob([meta],{type:'application/json'}));
     form.append('file',blob);
-    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true',{
       method:'POST', headers:{Authorization:'Bearer '+state.token}, body:form
     }).then(function(r){return r.json();}).then(function(d){
       if(d.id){state.photoCount++;var el=document.getElementById('camera-count');el.textContent=state.photoCount+' photo'+(state.photoCount!==1?'s':'')+' saved';el.classList.add('show');}
@@ -358,11 +358,11 @@ function uploadPhoto(blob) {
 function ensurePhotosFolder(parentId, cb) {
   if (state.photoFolderId) { cb(state.photoFolderId); return; }
   var q=encodeURIComponent("'"+parentId+"' in parents and name='Photos' and mimeType='application/vnd.google-apps.folder' and trashed=false");
-  fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id)',{headers:{Authorization:'Bearer '+state.token}})
+  fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id)&supportsAllDrives=true&includeItemsFromAllDrives=true',{headers:{Authorization:'Bearer '+state.token}})
   .then(function(r){return r.json();}).then(function(d){
     if(d.files&&d.files.length>0){state.photoFolderId=d.files[0].id;cb(state.photoFolderId);}
     else{
-      fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},body:JSON.stringify({name:'Photos',mimeType:'application/vnd.google-apps.folder',parents:[parentId]})})
+      fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true',{method:'POST',headers:{Authorization:'Bearer '+state.token,'Content-Type':'application/json'},body:JSON.stringify({name:'Photos',mimeType:'application/vnd.google-apps.folder',parents:[parentId]})})
       .then(function(r){return r.json();}).then(function(f){state.photoFolderId=f.id;cb(f.id);});
     }
   });
