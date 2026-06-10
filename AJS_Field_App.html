@@ -209,10 +209,11 @@ function loadFolder(folderId, folderName) {
   })
   .then(function(r){return r.json();})
   .then(function(data) {
-    if (data.error) { showToast('Error: ' + data.error.message); return; }
+    console.log('Drive API response:', JSON.stringify(data));
+    if (data.error) { showToast('Error: ' + data.error.message); console.error('Drive error:', data.error); return; }
     renderList(data.files || []);
   })
-  .catch(function() { showToast('Connection error'); });
+  .catch(function(err) { showToast('Connection error'); console.error('Fetch error:', err); });
 }
 
 function renderList(folders) {
